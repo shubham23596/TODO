@@ -81,7 +81,7 @@
                     <navigationItem key="navigationItem" title="Items" id="EsH-6n-6vc">
                         <barButtonItem key="rightBarButtonItem" systemItem="add" id="iwe-kH-lzo">
                             <connections>
-                                <action selector="addNewItems:" destination="XXh-WS-pD9" id="flu-86-j77"/>
+                                <action selector="addButtonPressed:" destination="XXh-WS-pD9" id="Y9a-ni-Irl"/>
                             </connections>
                         </barButtonItem>
                     </navigationItem>

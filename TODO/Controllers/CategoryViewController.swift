@@ -7,31 +7,31 @@
 //
 
 import UIKit
-import CoreData
+import RealmSwift
 class CategoryViewController: UITableViewController {
-var itemArry = [Category]()
+    let realm = try! Realm()
+    var itemArry : Results<Category>?
    
- let context = (UIApplication.shared.delegate as! AppDelegate).persistentContainer.viewContext
+
     override func viewDidLoad() {
         super.viewDidLoad()
         LoadItems()
     }
     override func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
-        return itemArry.count
+        return itemArry?.count ?? 1
     }
     override func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
         let cell = tableView.dequeueReusableCell(withIdentifier: "CategoryCell")
-        let item = itemArry[indexPath.row]
-        cell?.textLabel?.text = item.name
+        cell?.textLabel?.text = itemArry?[indexPath.row].name ?? "no ctegories added"
         return cell!
     }
     override func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
         performSegue(withIdentifier: "goToItems", sender: self)
     }
     override func prepare(for segue: UIStoryboardSegue, sender: Any?) {
-        let destinationVC = segue.destination as! ToDoListViewController
+       let destinationVC = segue.destination as! ToDoListViewController
         if let indexPath = tableView.indexPathForSelectedRow {
-            destinationVC.selectedCategory = itemArry[indexPath.row]
+            destinationVC.selectedCategory = itemArry?[indexPath.row]
         }
       
     }
@@ -40,11 +40,11 @@ var itemArry = [Category]()
         let alert = UIAlertController(title: "Add New Task", message: "", preferredStyle: .alert)
         let action = UIAlertAction(title: "Add Item", style: .default){(action) in
             //print(textField.text)
-            let newIem = Category(context: self.context)
+            let newIem = Category()
             newIem.name = textField.text!
-            self.itemArry.append(newIem)
+           // self.itemArry.append(newIem)
             
-            self.saveItems()
+            self.saveItems(category: newIem)
         }
         alert.addTextField { (alertTextField) in
             alertTextField.placeholder = "Create new Task"
@@ -54,24 +54,22 @@ var itemArry = [Category]()
         alert.addAction(action)
         present(alert, animated: true, completion: nil)
     }
-    func saveItems(){
+    
+    func saveItems(category: Category){
         
         do {
-            try context.save()
+            try realm.write {
+              realm.add(category)
+            }
         }
         catch{
             print("error saving context, \(error)")
         }
         self.tableView.reloadData()
     }
-    func LoadItems(with request: NSFetchRequest<Category> = Category.fetchRequest()){
+    func LoadItems(){
         
-        do {
-            itemArry = try context.fetch(request)
-        }
-        catch{
-            print("error in fetching data\(error)")
-        }
+       itemArry = realm.objects(Category.self)
         tableView.reloadData()
     }
 }
